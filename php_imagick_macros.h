@@ -300,6 +300,35 @@
 		intern->drawing_wand = new_wand; \
 	} \
 
+#define IMAGICK_CAST_COLOR_PARAMETER_TO_PIXELWAND(param, pixel_wand, caller) \
+	switch (Z_TYPE_P(param)) { \
+		case IS_STRING: \
+			pixel_wand.ptr = NewPixelWand(); \
+			if (!PixelSetColor(pixel_wand.ptr, Z_STRVAL_P(param))) { \
+				pixel_wand.ptr = DestroyPixelWand(pixel_wand.ptr); \
+				IMAGICK_THROW_EXCEPTION_WITH_MESSAGE(caller, "Unrecognized color string", caller); \
+				return; \
+			} \
+			pixel_wand.free = 1; \
+		    break; \
+		break; \
+		case IS_OBJECT: \
+			pixel_wand.free = 0; \
+			if (instanceof_function_ex(Z_OBJCE_P(param), php_imagickpixel_sc_entry, 0 TSRMLS_CC)) { \
+				php_imagickpixel_object *internp = (php_imagickpixel_object *)zend_object_store_get_object(param TSRMLS_CC); \
+				pixel_wand.ptr = internp->pixel_wand; \
+			} else { \
+				IMAGICK_THROW_EXCEPTION_WITH_MESSAGE(caller, "The parameter must be an instance of ImagickPixel or a string", (long)caller); \
+			} \
+		break; \
+		default: \
+			pixel_wand.free = 0; \
+			IMAGICK_THROW_EXCEPTION_WITH_MESSAGE(caller, "Invalid parameter provided", (long)caller); \
+		break; \
+	} \
+
+#define IMAGICK_FREE_PIXELWAND(pixel_wand) if (pixel_wand.free) pixel_wand.ptr = DestroyPixelWand(pixel_wand.ptr)
+
 #define IMAGICK_CAST_PARAMETER_TO_COLOR(param, internp, caller) \
 	switch (Z_TYPE_P(param)) { \
 		case IS_STRING: \

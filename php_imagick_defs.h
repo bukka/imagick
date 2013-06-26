@@ -99,6 +99,12 @@ typedef struct _php_imagickpixel_object  {
 	int initialized_via_iterator;
 } php_imagickpixel_object;
 
+/* Imagick Wrapper for PixelWand */
+typedef struct _php_imagick_pixelwand {
+	PixelWand *ptr;
+	int free;
+} php_imagick_pixelwand;
+
 /* Define some color constants */
 #define IMAGICKCOLORBLACK 11
 #define IMAGICKCOLORBLUE 12

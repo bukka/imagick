@@ -8145,7 +8145,7 @@ PHP_METHOD(imagick, borderimage)
 {
 	zval *param;
 	php_imagick_object *intern;
-	php_imagickpixel_object *internp;
+	php_imagick_pixelwand pixel_wand;
 	MagickBooleanType status;
 	long width, height;
 
@@ -8156,9 +8156,11 @@ PHP_METHOD(imagick, borderimage)
 	intern = (php_imagick_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	IMAGICK_CHECK_NOT_EMPTY(intern->magick_wand, 1, 1);
-	IMAGICK_CAST_PARAMETER_TO_COLOR(param, internp, 1);
+	IMAGICK_CAST_COLOR_PARAMETER_TO_PIXELWAND(param, pixel_wand, 1);
 
-	status = MagickBorderImage(intern->magick_wand, internp->pixel_wand, width, height);
+	status = MagickBorderImage(intern->magick_wand, pixel_wand.ptr, width, height);
+
+	IMAGICK_FREE_PIXELWAND(pixel_wand);
 
 	/* No magick is going to happen */
 	if (status == MagickFalse) {
